@@ -20,8 +20,8 @@ This code repository accompanies the article titled "A Generative Benchmark for 
 - Clone this repo:
 
 ```bash
-git clone https://github.com/......
-cd .....
+git clone https://github.com/edwardcao3026/SegBenchmark.git
+cd SegBenchmark
 ```
 
 ## 1.Cell Contour Generation
@@ -31,7 +31,7 @@ cd .....
 - Generate diverse cell contours using the following command:
 
 ```python
-python generate_gray.py --outdir=./output_folder --seeds=number of seeds --network= path to netwrok 
+python generate.py --outdir=./output_folder --seeds=number of seeds --network= path to netwrok 
 ```
 
 
@@ -53,16 +53,16 @@ At this stage, we will use the generated dataset to compare the performance of v
 
 Here are the specific steps for using three different segmentation methods in articles:
 
-### 3.1 [CellPose](https://www.CellPose.org/)
+### 3.1 [CellPose](https://www.CellPose.org/) <a href="#refer-1">[1]</a>
 
 #### 3.1.1 Run CellPose in GUI
 
 ```bash
-# Install CellPose and the GUI dependencies from your base environment using the command
-python -m pip install CellPose[gui]
+# Install cellpose and the GUI dependencies from your base environment using the command
+python -m pip install cellpose[gui]
 
 # The quickest way to start is to open the GUI from a command line terminal.
-python -m CellPose
+python -m cellpose
 ```
 
 - Load an image in the GUI (by dragging and dropping the image or by selecting "Load" from the File menu).
@@ -76,13 +76,13 @@ python -m CellPose
 The parameter inputs in the GUI interface can also be achieved through the terminal mode:
 
 ```bash
-python -m CellPose --dir ~/images_cyto/test/ --pretrained_model cyto --chan 2 --chan2 3 --save_png
+python -m cellpose --dir ~/images_cyto/test/ --pretrained_model cyto --chan 2 --chan2 3 --save_png
 ```
 
 All parameters can be viewed using the help parameter:
 
 ```bash
-python -m CellPose -h
+python -m cellpose -h
 ```
 
 #### 3.1.3 Run CellPose in Code
@@ -90,10 +90,10 @@ python -m CellPose -h
 Similar to the previous two methods, CellPose can also be called directly in Python code for programming: 
 
 ```python
-from CellPose import models
+from cellpose import models
 import skimage.io
 
-model = models.CellPose(gpu=False, model_type='cyto')
+model = models.Cellpose(gpu=False, model_type='cyto')
 
 files = ['img0.tif', 'img1.tif']
 
@@ -103,7 +103,7 @@ masks, flows, styles, diams = model.eval(imgs, diameter=None, channels=[0,0],
                                          threshold=0.4, do_3D=False)
 ```
 
-### 3.2 CellPofiler
+### 3.2 CellPofiler <a href="#refer-1">[2]</a>
 
 [CellProfiler](https://cellprofiler.org/) is a free software developed by the Broad Institute of Harvard and MIT. It is designed to enable biologists to quantitatively measure phenotypes of thousands of images automatically, without the need for computer vision or programming training.
 
@@ -126,15 +126,15 @@ Creating a specific pipeline for cell segmentation in CellProfiler involves a se
 5. **Export Data:**
    - Finally, use `ExportToSpreadsheet` and `SaveImages` modules to export your results for further analysis.
 
-### 3.3 Deepcell
+### 3.3 DeepCell <a href="#refer-1">[3]</a>
 
 Researchers have developed a deep learning segmentation algorithm, Mesmer, which consists of a ResNet50 backbone and a feature pyramid network. It automatically extracts key cell features, such as subcellular localization of protein signals, achieving human-level performance.
 
-#### 3.3.1Run Deepcell in website
+#### 3.3.1Run DeepCell in website
 
-Visit the pre-trained deep learning models on [deepcell.org](https://deepcell.org/). This website allows you to easily upload example images, run them on available models, and download the results without any local installation required.
+Visit the pre-trained deep learning models on [DeepCell.org](https://DeepCell.org/). This website allows you to easily upload example images, run them on available models, and download the results without any local installation required.
 
-#### 3.3.2 Run Deepcell in Docker
+#### 3.3.2 Run DeepCell in Docker
 
 1. **Install DeepCell with pip:**
    ```python
@@ -145,7 +145,7 @@ Visit the pre-trained deep learning models on [deepcell.org](https://deepcell.or
    - If you have a GPU, ensure you have CUDA and Docker installed.
    - Run the Docker command to start a container with DeepCell installed:
      ```bash
-     docker run --gpus '"device=0"' -it --rm -p 8888:8888 -v $PWD/notebooks:/notebooks -v $PWD/data:/data vanvalenlab/deepcell-tf:latest-gpu
+     docker run --gpus '"device=0"' -it --rm -p 8888:8888 -v $PWD/notebooks:/notebooks -v $PWD/data:/data vanvalenlab/DeepCell-tf:latest-gpu
      ```
    - This command starts a Jupyter session and mounts data and notebook directories.
 
@@ -153,9 +153,9 @@ Visit the pre-trained deep learning models on [deepcell.org](https://deepcell.or
    - The DeepCell documentation includes examples of training segmentation and tracking models.
    - You can find Python notebooks for these examples, illustrating how to use DeepCell for single-cell analysis.
 
-For more detailed information and examples, you should refer to the [DeepCell documentation](https://deepcell.readthedocs.io/en/master/). This resource provides comprehensive guidance on installing and using DeepCell, including example notebooks for various applications.
+For more detailed information and examples, you should refer to the [DeepCell documentation](https://DeepCell.readthedocs.io/en/master/). This resource provides comprehensive guidance on installing and using DeepCell, including example notebooks for various applications.
 
-#### 3.3.3 Run Deepcell in Code
+#### 3.3.3 Run DeepCell in Code
 
 To run DeepCell in Python, you can follow this script:
 
@@ -163,7 +163,7 @@ To run DeepCell in Python, you can follow this script:
 import os
 import numpy as np
 from skimage.io import imread, imsave
-from deepcell.applications import Mesmer
+from DeepCell.applications import Mesmer
 
 def binarize_image(image):
     """Binarize an image: set all non-zero pixels to 1."""
@@ -214,3 +214,13 @@ process_directory(input_directory, output_directory)
 
 After running the three segmentation methods as described above, you can proceed to analyze the segmentation results by running the `analysis.py` script. The results of the analysis will be saved as a CSV (Comma-Separated Values) file.
 
+## Reference
+
+<div id="refer-1"></div>
+[1] Stringer, Carsen, et al. "Cellpose: a generalist algorithm for cellular segmentation." Nature methods 18.1 (2021): 100-106.
+
+<div id="refer-2"></div>
+[2] Carpenter, Anne E., et al. "CellProfiler: image analysis software for identifying and quantifying cell phenotypes." Genome biology 7 (2006): 1-11.
+
+<div id="refer-3"></div>
+[3] Greenwald, Noah F., et al. "Whole-cell segmentation of tissue images with human-level performance using large-scale data annotation and deep learning." Nature biotechnology 40.4 (2022): 555-565.
