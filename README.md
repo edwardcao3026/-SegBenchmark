@@ -31,18 +31,17 @@ cd SegBenchmark
 - Generate diverse cell contours using the following command:
 
 ```python
-python generate.py --outdir=./output_folder --seeds=number of seeds --network= path to netwrok 
+python generate_contours.py --outdir=./output_folder --seeds=number of seeds --network= path to netwrok 
 ```
 
 
 
 ## 2.Image Rendering
 
-- Utilize `test.py` for realistic image rendering:
+- Utilize `image_rendering.py` for realistic image rendering:
 
 ```bash
-
-python test.py --name cell --label_nc 0 --no_instance --which_epoch 80 --how_many numbers to generate
+python image_rendering.py --label_nc 0 --no_instance
 ```
 
 
