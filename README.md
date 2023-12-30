@@ -9,19 +9,17 @@ This code repository accompanies the article titled "A Generative Benchmark for 
 
 - Linux and Windows are supported, but we recommend Linux for performance and compatibility reasons.
 - 1–8 high-end NVIDIA GPUs with at least 12 GB of memory. 
-- 64-bit Python 3.8 and PyTorch 1.12.0 (or later). See https://pytorch.org for PyTorch install instructions. CUDA toolkit 11.6 or later.
 - GCC 7 or later (Linux) or Visual Studio (Windows) compilers. Recommended GCC version depends on CUDA version, see for example [CUDA 11.6 system requirements](https://docs.nvidia.com/cuda/archive/11.6.0/cuda-installation-guide-linux/index.html#system-requirements).
-- Python libraries: see `environment.yml `for exact library dependencies. You can use the following commands with Miniconda3/Anaconda3 to create and activate your cell Python environment:
-  - `conda env create -f environment.yml`
-  - `conda activate cell`
+- 64-bit Python 3.8 and PyTorch 1.8.2 (or later). See https://pytorch.org for PyTorch install instructions. CUDA toolkit 11.0 or later.
+- Python libraries: Install the required libraries by running `pip install -r requirements.txt`. 
 
 ## Getting Started
 
 - Clone this repo:
 
 ```bash
-git clone https://github.com/......
-cd .....
+git clone https://github.com/edwardcao3026/SegBenchmark.git
+cd SegBenchmark
 ```
 
 ## 1.Cell Contour Generation
@@ -31,18 +29,17 @@ cd .....
 - Generate diverse cell contours using the following command:
 
 ```python
-python generate_gray.py --outdir=./output_folder --seeds=number of seeds --network= path to netwrok 
+python generate_contours.py --outdir=./output_folder --seeds=number of seeds --network= path to netwrok 
 ```
 
 
 
 ## 2.Image Rendering
 
-- Utilize `test.py` for realistic image rendering:
+- Utilize `image_rendering.py` for realistic image rendering:
 
 ```bash
-
-python test.py --name cell --label_nc 0 --no_instance --which_epoch 80 --how_many numbers to generate
+python image_rendering.py --label_nc 0 --no_instance
 ```
 
 
@@ -53,16 +50,16 @@ At this stage, we will use the generated dataset to compare the performance of v
 
 Here are the specific steps for using three different segmentation methods in articles:
 
-### 3.1 [CellPose](https://www.CellPose.org/)
+### 3.1 [CellPose](https://www.CellPose.org/) <a href="#refer-1">[1]</a>
 
 #### 3.1.1 Run CellPose in GUI
 
 ```bash
-# Install CellPose and the GUI dependencies from your base environment using the command
-python -m pip install CellPose[gui]
+# Install cellpose and the GUI dependencies from your base environment using the command
+python -m pip install cellpose[gui]
 
 # The quickest way to start is to open the GUI from a command line terminal.
-python -m CellPose
+python -m cellpose
 ```
 
 - Load an image in the GUI (by dragging and dropping the image or by selecting "Load" from the File menu).
@@ -76,13 +73,13 @@ python -m CellPose
 The parameter inputs in the GUI interface can also be achieved through the terminal mode:
 
 ```bash
-python -m CellPose --dir ~/images_cyto/test/ --pretrained_model cyto --chan 2 --chan2 3 --save_png
+python -m cellpose --dir ~/images_cyto/test/ --pretrained_model cyto --chan 2 --chan2 3 --save_png
 ```
 
 All parameters can be viewed using the help parameter:
 
 ```bash
-python -m CellPose -h
+python -m cellpose -h
 ```
 
 #### 3.1.3 Run CellPose in Code
@@ -90,10 +87,10 @@ python -m CellPose -h
 Similar to the previous two methods, CellPose can also be called directly in Python code for programming: 
 
 ```python
-from CellPose import models
+from cellpose import models
 import skimage.io
 
-model = models.CellPose(gpu=False, model_type='cyto')
+model = models.Cellpose(gpu=False, model_type='cyto')
 
 files = ['img0.tif', 'img1.tif']
 
@@ -103,7 +100,7 @@ masks, flows, styles, diams = model.eval(imgs, diameter=None, channels=[0,0],
                                          threshold=0.4, do_3D=False)
 ```
 
-### 3.2 CellPofiler
+### 3.2 CellPofiler <a href="#refer-1">[2]</a>
 
 [CellProfiler](https://cellprofiler.org/) is a free software developed by the Broad Institute of Harvard and MIT. It is designed to enable biologists to quantitatively measure phenotypes of thousands of images automatically, without the need for computer vision or programming training.
 
@@ -126,15 +123,15 @@ Creating a specific pipeline for cell segmentation in CellProfiler involves a se
 5. **Export Data:**
    - Finally, use `ExportToSpreadsheet` and `SaveImages` modules to export your results for further analysis.
 
-### 3.3 Deepcell
+### 3.3 DeepCell <a href="#refer-1">[3]</a>
 
 Researchers have developed a deep learning segmentation algorithm, Mesmer, which consists of a ResNet50 backbone and a feature pyramid network. It automatically extracts key cell features, such as subcellular localization of protein signals, achieving human-level performance.
 
-#### 3.3.1Run Deepcell in website
+#### 3.3.1Run DeepCell in website
 
-Visit the pre-trained deep learning models on [deepcell.org](https://deepcell.org/). This website allows you to easily upload example images, run them on available models, and download the results without any local installation required.
+Visit the pre-trained deep learning models on [DeepCell.org](https://DeepCell.org/). This website allows you to easily upload example images, run them on available models, and download the results without any local installation required.
 
-#### 3.3.2 Run Deepcell in Docker
+#### 3.3.2 Run DeepCell in Docker
 
 1. **Install DeepCell with pip:**
    ```python
@@ -145,7 +142,7 @@ Visit the pre-trained deep learning models on [deepcell.org](https://deepcell.or
    - If you have a GPU, ensure you have CUDA and Docker installed.
    - Run the Docker command to start a container with DeepCell installed:
      ```bash
-     docker run --gpus '"device=0"' -it --rm -p 8888:8888 -v $PWD/notebooks:/notebooks -v $PWD/data:/data vanvalenlab/deepcell-tf:latest-gpu
+     docker run --gpus '"device=0"' -it --rm -p 8888:8888 -v $PWD/notebooks:/notebooks -v $PWD/data:/data vanvalenlab/DeepCell-tf:latest-gpu
      ```
    - This command starts a Jupyter session and mounts data and notebook directories.
 
@@ -153,59 +150,33 @@ Visit the pre-trained deep learning models on [deepcell.org](https://deepcell.or
    - The DeepCell documentation includes examples of training segmentation and tracking models.
    - You can find Python notebooks for these examples, illustrating how to use DeepCell for single-cell analysis.
 
-For more detailed information and examples, you should refer to the [DeepCell documentation](https://deepcell.readthedocs.io/en/master/). This resource provides comprehensive guidance on installing and using DeepCell, including example notebooks for various applications.
+For more detailed information and examples, you should refer to the [DeepCell documentation](https://DeepCell.readthedocs.io/en/master/). This resource provides comprehensive guidance on installing and using DeepCell, including example notebooks for various applications.
 
-#### 3.3.3 Run Deepcell in Code
+#### 3.3.3 Run DeepCell in Code
 
 To run DeepCell in Python, you can follow this script:
 
 ```python
-import os
 import numpy as np
-from skimage.io import imread, imsave
+from skimage.io import imread
 from deepcell.applications import Mesmer
 
-def binarize_image(image):
-    """Binarize an image: set all non-zero pixels to 1."""
-    return (image > 0).astype(np.uint8)
+app = Mesmer()
 
-def process_directory(input_dir, output_dir, image_mpp=0.17):
-    cytoplasm_path = os.path.join(output_dir, "cytoplasm")
-    nucleus_path = os.path.join(output_dir,"nuclei")
+# List of image file paths
+files = ['image1.jpg', 'image2.jpg']
 
-    if not os.path.exists(cytoplasm_path):
-        os.makedirs(cytoplasm_path)
-    if not os.path.exists(nucleus_path):
-        os.makedirs(nucleus_path)
+for file in files:
+    im = imread(file)
 
-    app = Mesmer()
+    # Select only the relevant channels (assuming the image has multiple channels)
+    im = im[:, :, [1, 2]]
 
-    for filename in os.listdir(input_dir):
-        if filename.endswith(".jpg"):
-            filepath = os.path.join(input_dir, filename)
-            
-            im = imread(filepath)
+    # Expand dimensions to match the input shape expected by Mesmer
+    im = np.expand_dims(im, axis=0)
 
-            im = im[:, :, [1, 2]]
-
-            im = np.expand_dims(im, axis=0)
-            
-            labeled_image = app.predict(im, compartment='both', image_mpp=image_mpp)
-            
-            binarized_cytoplasm = binarize_image(labeled_image[0, :, :, 0])
-            binarized_nucleus = binarize_image(labeled_image[0, :, :, 1])
-
-            base_filename = os.path.splitext(filename)[0] + ".png"
-
-            cytoplasm_output_path = os.path.join(cytoplasm_path, base_filename)
-            nucleus_output_path = os.path.join(nucleus_path, base_filename)
-            imsave(cytoplasm_output_path, binarized_cytoplasm)
-            imsave(nucleus_output_path, binarized_nucleus)
-
-
-input_directory = 'your input path'
-output_directory = 'your save path'
-process_directory(input_directory, output_directory)
+    # Predict the labeled image
+    labeled_image = app.predict(im, compartment='both')
 ```
 
 
@@ -214,3 +185,13 @@ process_directory(input_directory, output_directory)
 
 After running the three segmentation methods as described above, you can proceed to analyze the segmentation results by running the `analysis.py` script. The results of the analysis will be saved as a CSV (Comma-Separated Values) file.
 
+## Reference
+
+<div id="refer-1"></div>
+[1] Stringer, Carsen, et al. "Cellpose: a generalist algorithm for cellular segmentation." Nature methods 18.1 (2021): 100-106.
+
+<div id="refer-2"></div>
+[2] Carpenter, Anne E., et al. "CellProfiler: image analysis software for identifying and quantifying cell phenotypes." Genome biology 7 (2006): 1-11.
+
+<div id="refer-3"></div>
+[3] Greenwald, Noah F., et al. "Whole-cell segmentation of tissue images with human-level performance using large-scale data annotation and deep learning." Nature biotechnology 40.4 (2022): 555-565.
