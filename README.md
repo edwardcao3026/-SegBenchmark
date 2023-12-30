@@ -9,11 +9,9 @@ This code repository accompanies the article titled "A Generative Benchmark for 
 
 - Linux and Windows are supported, but we recommend Linux for performance and compatibility reasons.
 - 1–8 high-end NVIDIA GPUs with at least 12 GB of memory. 
-- 64-bit Python 3.8 and PyTorch 1.12.0 (or later). See https://pytorch.org for PyTorch install instructions. CUDA toolkit 11.6 or later.
 - GCC 7 or later (Linux) or Visual Studio (Windows) compilers. Recommended GCC version depends on CUDA version, see for example [CUDA 11.6 system requirements](https://docs.nvidia.com/cuda/archive/11.6.0/cuda-installation-guide-linux/index.html#system-requirements).
-- Python libraries: see `environment.yml `for exact library dependencies. You can use the following commands with Miniconda3/Anaconda3 to create and activate your cell Python environment:
-  - `conda env create -f environment.yml`
-  - `conda activate cell`
+- 64-bit Python 3.8 and PyTorch 1.8.2 (or later). See https://pytorch.org for PyTorch install instructions. CUDA toolkit 11.0 or later.
+- Python libraries: Install the required libraries by running `pip install -r requirements.txt`. 
 
 ## Getting Started
 
@@ -159,52 +157,26 @@ For more detailed information and examples, you should refer to the [DeepCell do
 To run DeepCell in Python, you can follow this script:
 
 ```python
-import os
 import numpy as np
-from skimage.io import imread, imsave
-from DeepCell.applications import Mesmer
+from skimage.io import imread
+from deepcell.applications import Mesmer
 
-def binarize_image(image):
-    """Binarize an image: set all non-zero pixels to 1."""
-    return (image > 0).astype(np.uint8)
+app = Mesmer()
 
-def process_directory(input_dir, output_dir, image_mpp=0.17):
-    cytoplasm_path = os.path.join(output_dir, "cytoplasm")
-    nucleus_path = os.path.join(output_dir,"nuclei")
+# List of image file paths
+files = ['image1.jpg', 'image2.jpg']
 
-    if not os.path.exists(cytoplasm_path):
-        os.makedirs(cytoplasm_path)
-    if not os.path.exists(nucleus_path):
-        os.makedirs(nucleus_path)
+for file in files:
+    im = imread(file)
 
-    app = Mesmer()
+    # Select only the relevant channels (assuming the image has multiple channels)
+    im = im[:, :, [1, 2]]
 
-    for filename in os.listdir(input_dir):
-        if filename.endswith(".jpg"):
-            filepath = os.path.join(input_dir, filename)
-            
-            im = imread(filepath)
+    # Expand dimensions to match the input shape expected by Mesmer
+    im = np.expand_dims(im, axis=0)
 
-            im = im[:, :, [1, 2]]
-
-            im = np.expand_dims(im, axis=0)
-            
-            labeled_image = app.predict(im, compartment='both', image_mpp=image_mpp)
-            
-            binarized_cytoplasm = binarize_image(labeled_image[0, :, :, 0])
-            binarized_nucleus = binarize_image(labeled_image[0, :, :, 1])
-
-            base_filename = os.path.splitext(filename)[0] + ".png"
-
-            cytoplasm_output_path = os.path.join(cytoplasm_path, base_filename)
-            nucleus_output_path = os.path.join(nucleus_path, base_filename)
-            imsave(cytoplasm_output_path, binarized_cytoplasm)
-            imsave(nucleus_output_path, binarized_nucleus)
-
-
-input_directory = 'your input path'
-output_directory = 'your save path'
-process_directory(input_directory, output_directory)
+    # Predict the labeled image
+    labeled_image = app.predict(im, compartment='both')
 ```
 
 
